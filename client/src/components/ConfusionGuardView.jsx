@@ -66,7 +66,7 @@ export default function ConfusionGuardView() {
       <div className="module-body-card">
         <div className="form-group">
           <label className="form-label">Enter Drug Name, Pair, or Medical Term</label>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="search-input-group">
             <input 
               type="text" 
               className="form-input" 
@@ -79,7 +79,6 @@ export default function ConfusionGuardView() {
               className="btn-primary" 
               onClick={() => handleCheck()}
               disabled={loading}
-              style={{ minWidth: '160px' }}
             >
               {loading ? 'Evaluating...' : '🛡️ Safety Scan'}
             </button>

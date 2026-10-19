@@ -59,7 +59,7 @@ export default function HandwrittenOCRView() {
 
   return (
     <div className="handwritten-ocr-container">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '2.5rem', alignItems: 'flex-start' }}>
+      <div className="ocr-grid-layout">
         {/* Left: Image input & preview */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>

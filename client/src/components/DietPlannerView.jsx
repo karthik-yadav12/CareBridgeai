@@ -89,7 +89,7 @@ export default function DietPlannerView() {
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <div className="diet-inputs-grid">
           <div>
             <label className="form-label">Dietary Preference</label>
             <input 
@@ -142,7 +142,7 @@ export default function DietPlannerView() {
             )}
 
             {/* Foods to Emphasize & Avoid in 2 columns */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="diet-columns-grid">
               {/* Emphasize */}
               <div style={{ background: '#ecfdf5', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid #a7f3d0' }}>
                 <h4 style={{ color: '#065f46', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import QuickActionCards from './components/QuickActionCards';
@@ -50,13 +49,7 @@ export default function App() {
 
   return (
     <div className="carebridge-landing-page">
-      {/* 1. Top Utility Banner */}
-      <TopBanner 
-        currentLang={currentLang} 
-        setLanguage={setLanguage} 
-      />
-
-      {/* 2. Main Navigation Bar */}
+      {/* 1. Main Navigation Bar */}
       <Navbar 
         activeTab={activeTab}
         setActiveTab={handleOpenWorkspace}

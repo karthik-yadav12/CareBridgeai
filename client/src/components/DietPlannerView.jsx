@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 const PRESET_CONDITIONS = [
   'Post-Cardiac Stent / Angioplasty (Low-Sodium, Antiplatelet Safe)',
@@ -21,7 +22,7 @@ export default function DietPlannerView() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/diet-plan', {
+      const response = await fetch(`${API_BASE_URL}/api/diet-plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 const SAMPLES = [
   'Metoprolol Tartrate vs Succinate ER',
@@ -25,7 +26,7 @@ export default function ConfusionGuardView() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/confusion-check', {
+      const response = await fetch(`${API_BASE_URL}/api/confusion-check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchText })

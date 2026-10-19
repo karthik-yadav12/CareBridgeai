@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 export default function ProfileModal({ isOpen, onClose, userProfile, setUserProfile, setToastMessage }) {
   if (!isOpen) return null;
@@ -26,7 +27,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailOrPhone, password })
@@ -82,7 +83,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

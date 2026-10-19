@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 export default function HandwrittenOCRView() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -37,7 +38,7 @@ export default function HandwrittenOCRView() {
         formData.append('sampleUsed', 'true');
       }
 
-      const response = await fetch('http://localhost:5000/api/handwritten-ocr', {
+      const response = await fetch(`${API_BASE_URL}/api/handwritten-ocr`, {
         method: 'POST',
         body: formData
       });

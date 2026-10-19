@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Environment
+.env
+
+# Build outputs
+# Note: we can keep client/dist for easy deployment
+# client/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

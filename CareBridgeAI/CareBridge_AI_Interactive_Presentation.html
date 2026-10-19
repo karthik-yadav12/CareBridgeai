@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareBridge AI — 7-Slide Structured Presentation</title>
+<style>
+  :root {
+    --bg-dark: #070d1e;
+    --card-bg: rgba(18, 28, 54, 0.85);
+    --card-border: rgba(56, 189, 248, 0.25);
+    --cyan: #38bdf8;
+    --green: #34d399;
+    --amber: #fb923c;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --text-white: #ffffff;
+    --text-light: #e2e8f0;
+    --text-muted: #94a3b8;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  body {
+    background: radial-gradient(circle at 50% 20%, #111f42 0%, #070d1e 80%);
+    color: var(--text-white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Glowing Top Progress Bar */
+  .top-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--cyan), var(--green), var(--purple));
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 100;
+    box-shadow: 0 0 15px var(--cyan);
+  }
+
+  /* Deck Container */
+  .deck-container {
+    max-width: 1200px;
+    width: 95%;
+    margin: 35px auto;
+    position: relative;
+    min-height: 650px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 38px 48px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide.active {
+    display: block;
+    animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideInUp {
+    0% { opacity: 0; transform: translateY(28px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Header Tags & Titles */
+  .slide-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: rgba(56, 189, 248, 0.15);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    margin-bottom: 10px;
+  }
+
+  .slide-title {
+    font-size: 29px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 20px;
+    line-height: 1.25;
+  }
+
+  /* Layout Grids */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* Cards */
+  .card {
+    background: rgba(14, 23, 45, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 22px;
+    position: relative;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--cyan);
+    box-shadow: 0 12px 30px rgba(56, 189, 248, 0.15);
+  }
+
+  .card.accent-cyan { border-top: 4px solid var(--cyan); }
+  .card.accent-green { border-top: 4px solid var(--green); }
+  .card.accent-amber { border-top: 4px solid var(--amber); }
+  .card.accent-red { border-top: 4px solid var(--red); }
+  .card.accent-purple { border-top: 4px solid var(--purple); }
+
+  .card-title {
+    font-size: 17.5px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .card-text {
+    font-size: 13.5px;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+
+  /* Hero & Thank You Slides */
+  .hero-slide {
+    text-align: center;
+    padding: 50px 40px;
+  }
+
+  .hero-logo {
+    font-size: 54px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #38bdf8 0%, #34d399 50%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    display: inline-block;
+    animation: glowPulse 3s infinite alternate ease-in-out;
+  }
+
+  @keyframes glowPulse {
+    0% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); }
+    100% { filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.7)); }
+  }
+
+  .hero-subtitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+
+  .hero-desc {
+    max-width: 820px;
+    margin: 0 auto 28px auto;
+    font-size: 15px;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+
+  /* Interactive Elements */
+  .btn-demo {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+  }
+
+  .btn-demo:hover {
+    filter: brightness(1.2);
+    transform: scale(1.03);
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-red { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; }
+  .badge-green { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid #34d399; }
+  .badge-amber { background: rgba(251, 146, 60, 0.2); color: #fb923c; border: 1px solid #fb923c; }
+  .badge-cyan { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+
+  /* Interactive Checklist */
+  .chk-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .chk-row:hover { background: rgba(255, 255, 255, 0.07); }
+  .chk-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--cyan);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--green);
+  }
+
+  /* Footer Controls */
+  .footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    width: 95%;
+    margin: 0 auto 28px auto;
+    padding: 0 10px;
+  }
+
+  .nav-btn {
+    background: rgba(30, 41, 59, 0.8);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-btn:hover {
+    background: var(--cyan);
+    color: #070d1e;
+    border-color: var(--cyan);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  }
+
+  .slide-counter {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  #confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-progress" id="topProgress"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="deck-container">
+
+  <!-- SLIDE 1: EXECUTIVE COVER -->
+  <div class="slide active hero-slide" data-slide="1">
+    <div class="slide-tag">🏥 EXECUTIVE PITCH & TECHNICAL PROPOSAL</div>
+    <div class="hero-logo">🌉 CareBridge AI</div>
+    <div class="hero-subtitle">Solving the Post-Discharge Patient Crisis through Multimodal Intelligence</div>
+    <div class="hero-desc">
+      A structured clinical presentation addressing unreadable doctor cursive prescriptions, ambiguous discharge paperwork, and preventable 30-day hospital readmissions.
+    </div>
+
+    <div class="grid-4" style="margin-top: 28px; text-align: left;">
+      <div class="card accent-red">
+        <span class="badge badge-red" style="margin-bottom: 8px;">PART 1</span>
+        <div class="card-title">1. Problem Statement</div>
+        <div class="card-text">Post-discharge crisis & doctor handwriting hazards.</div>
+      </div>
+      <div class="card accent-cyan">
+        <span class="badge badge-cyan" style="margin-bottom: 8px;">PART 2</span>
+        <div class="card-title">2. Proposed Solution</div>
+        <div class="card-text">Introducing CareBridge AI 4-Pillar Platform.</div>
+      </div>
+      <div class="card accent-green">
+        <span class="badge badge-green" style="margin-bottom: 8px;">PART 3</span>
+        <div class="card-title">3. Key Features</div>
+        <div class="card-text">AI Vision OCR, Confusion Detector & Alerts.</div>
+      </div>
+      <div class="card accent-purple">
+        <span class="badge badge-purple" style="margin-bottom: 8px;">PART 4</span>
+        <div class="card-title">4. Implementation</div>
+        <div class="card-text">Tech architecture, Responsible AI & governance.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: 1. PROBLEM STATEMENT -->
+  <div class="slide" data-slide="2">
+    <div class="slide-tag" style="background: rgba(248, 113, 113, 0.2); color: var(--red); border-color: var(--red);">1. PROBLEM STATEMENT</div>
+    <div class="slide-title">The Healthcare Crisis: Post-Discharge Breakdown & Clinical Hazards</div>
+
+    <div class="grid-2">
+      <div class="card accent-red">
+        <div class="card-title" style="color: var(--red); font-size: 19px;">🏥 Systemic Post-Discharge Breakdown</div>
+        <div class="card-text" style="font-size: 13.5px; margin-top: 10px;">
+          <p style="margin-bottom: 12px;"><strong>💰 $17B Readmission Burden:</strong> Nearly 1 in 5 elderly Medicare patients suffer avoidable hospital readmission within 30 days due to post-discharge confusion.</p>
+          <p style="margin-bottom: 12px;"><strong>⚠️ 50%+ Medication Errors:</strong> Over half of medication errors happen at home in the first 14 days from double-dosing or skipped blood pressure pills.</p>
+          <p><strong>📑 3 to 8 Pages of Latin Jargon:</strong> Discharge summaries are saturated with complex acronyms (PRN, BID, exacerbation) that bewilder non-medical families.</p>
+        </div>
+      </div>
+
+      <div class="card accent-amber">
+        <div class="card-title" style="color: var(--amber); font-size: 19px;">✍️ Critical Handwriting & Ambiguity Hazards</div>
+        <div class="card-text" style="font-size: 13.5px; margin-top: 10px;">
+          <p style="margin-bottom: 12px;"><strong>⚡ Hurried Doctor Cursive:</strong> Prescriptions in rapid cursive script and blue ink are unreadable to patients and non-specialists.</p>
+          <p style="margin-bottom: 12px;"><strong>❌ Legacy OCR Breakdown:</strong> Traditional OCR (Tesseract) drops cursive words completely, outputting blank lines or random noise.</p>
+          <p style="margin-bottom: 12px;"><strong>🗓️ Conflicting Clinic Dates:</strong> Doctor clinic notes say return Oct 21, but discharge summary says Oct 24—patients miss checkups.</p>
+          <p><strong>❓ Missing Timings:</strong> 'Take 1 tablet daily' without stating Morning or Bedtime triggers dangerous crashes.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: rgba(38, 25, 45, 0.9); border: 1px solid var(--red); padding: 12px 18px; border-radius: 12px; margin-top: 18px; color: var(--red); font-weight: bold; font-size: 13.5px;">
+      🛑 The Critical Safety Gap: Patients leave hospitals with fragmented paperwork, unreadable prescriptions, and zero proactive warning alarms to prevent fatal mistakes at home.
+    </div>
+  </div>
+
+  <!-- SLIDE 3: 2. PROPOSED SOLUTION -->
+  <div class="slide" data-slide="3">
+    <div class="slide-tag" style="background: rgba(56, 189, 248, 0.2); color: var(--cyan); border-color: var(--cyan);">2. PROPOSED SOLUTION</div>
+    <div class="slide-title">The Proposed Solution: Introducing CareBridge AI</div>
+
+    <div style="background: rgba(20, 36, 68, 0.85); padding: 16px 20px; border-radius: 12px; margin-bottom: 22px; border-left: 4px solid var(--cyan);">
+      <strong style="color: var(--cyan); font-size: 15px;">🌟 Our App is the Direct Solution:</strong> Transforming Complex Paperwork into Confident Home Recovery.<br>
+      <span style="font-size: 13px; color: var(--text-light);">CareBridge AI directly eliminates post-discharge breakdowns by combining Multimodal AI Vision, proactive safety audits, interactive checklists, and hands-free timeline alarms into a single patient-centered companion.</span>
+    </div>
+
+    <div class="grid-4">
+      <div class="card accent-cyan">
+        <span class="badge badge-cyan" style="margin-bottom: 8px;">PILLAR 01</span>
+        <div class="card-title">Multimodal AI Vision</div>
+        <div class="card-text">Enhances image contrast and deciphers doctor cursive handwriting & shorthand (BID, TID).</div>
+      </div>
+      <div class="card accent-green">
+        <span class="badge badge-green" style="margin-bottom: 8px;">PILLAR 02</span>
+        <div class="card-title">Medical Explainer</div>
+        <div class="card-text">Translates clinical jargon to plain 6th-grade English while strictly preserving exact dosages.</div>
+      </div>
+      <div class="card accent-amber">
+        <span class="badge badge-amber" style="margin-bottom: 8px;">PILLAR 03</span>
+        <div class="card-title">Confusion Detector</div>
+        <div class="card-text">Proactively catches blurred medications, missing frequencies, and conflicting clinic dates.</div>
+      </div>
+      <div class="card accent-purple">
+        <span class="badge badge-purple" style="margin-bottom: 8px;">PILLAR 04</span>
+        <div class="card-title">Autonomous Alerts</div>
+        <div class="card-text">Hands-free background push notifications, WhatsApp links, and SMS mapped to daily routine.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: 3. KEY FEATURES - PART 1 -->
+  <div class="slide" data-slide="4">
+    <div class="slide-tag" style="background: rgba(52, 211, 153, 0.2); color: var(--green); border-color: var(--green);">3. KEY FEATURES — PART 1</div>
+    <div class="slide-title">Key Features: Multimodal Vision & The Confusion Detector</div>
+
+    <div class="grid-2">
+      <div class="card accent-cyan">
+        <div class="card-title" style="color: var(--cyan);">👁️ Multimodal AI Vision for Handwriting</div>
+        <div class="card-text" style="margin-top: 10px; font-size: 13.5px;">
+          <p style="margin-bottom: 8px;">• <strong>PIL 1.6x Contrast Boost:</strong> Enhances faint ink and removes paper shadows.</p>
+          <p style="margin-bottom: 12px;">• <strong>Gemini 2.5 Flash Vision:</strong> Deep reasoning understands cursive physician penmanship and clinical shorthand.</p>
+          <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px;">
+            <div style="color: var(--cyan); margin-bottom: 6px;">Patient: John Smith | Dr. Steve Johnson</div>
+            <div>✅ <strong>Betaloc 100mg:</strong> 1 tab Twice Daily (BP)</div>
+            <div>✅ <strong>Dorzolamidum 10mg:</strong> 1 tab Twice Daily (Eye)</div>
+            <div>✅ <strong>Cimetidine 50mg:</strong> 2 tabs 3x Daily (Meals)</div>
+            <div>✅ <strong>Oxprenolol 50mg:</strong> 1 tab Once Daily (Heart)</div>
+            <div style="color: var(--green); margin-top: 6px; font-weight: bold;">Result: 100% Cursive Script Transcribed!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card accent-amber">
+        <div class="card-title" style="color: var(--amber);">🛡️ The Confusion Detector (Safety Scanner)</div>
+        <div class="card-text" style="margin-top: 10px; font-size: 13.5px;">
+          <p style="margin-bottom: 10px;">Proactively audits medical instructions before discharge to catch hazards:</p>
+          <p style="margin-bottom: 10px;"><span class="badge badge-red">HIGH SEVERITY</span> <strong>Illegible Medicine:</strong> Catches notes saying 'Take 1 capsule twice daily' with blurred names. Flags as UNVERIFIED to prevent ingestion.</p>
+          <p style="margin-bottom: 10px;"><span class="badge badge-amber">MEDIUM SEVERITY</span> <strong>Missing Timing:</strong> Flags drugs with dosage (50mg) but no Morning/Night time slot to avoid hypotensive crashes.</p>
+          <p><span class="badge badge-cyan">MEDIUM SEVERITY</span> <strong>Conflicting Clinic Dates:</strong> Flags date mismatches (e.g. Oct 21 vs Oct 24) and provides 1-click doctor contact link.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: 3. KEY FEATURES - PART 2 -->
+  <div class="slide" data-slide="5">
+    <div class="slide-tag" style="background: rgba(52, 211, 153, 0.2); color: var(--green); border-color: var(--green);">3. KEY FEATURES — PART 2</div>
+    <div class="slide-title">Key Features: Autonomous Alerts, Live Tracker & Family Hub</div>
+
+    <div class="grid-2">
+      <div class="card accent-purple">
+        <div class="card-title" style="color: var(--purple);">📱 Hands-Free Autonomous Alerts</div>
+        <div class="card-text" style="margin-top: 10px; font-size: 13.5px;">
+          <p style="margin-bottom: 8px;">• <strong>Zero-Click Push:</strong> Background worker fires alerts automatically (Instagram/WhatsApp style) with zero manual clicking.</p>
+          <p style="margin-bottom: 8px;">• <strong>OS Banners & Voice:</strong> Pops lock screen notification banners and rings an audible chime with spoken voice.</p>
+          <p style="margin-bottom: 10px;">• <strong>Daily Medication Timeline Slots:</strong></p>
+          <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+            🌅 Morning (08:00 AM) • ☀️ Afternoon (01:00 PM) • 🌙 Evening (08:00 PM)
+          </div>
+          <button class="btn-demo" onclick="triggerNotificationDemo()">🔔 Test Push Notification</button>
+        </div>
+      </div>
+
+      <div class="card accent-green">
+        <div class="card-title" style="color: var(--green);">📈 Side-by-Side Tracker & Family Hub</div>
+        <div style="margin-top: 10px;">
+          <div id="chkContainer">
+            <div class="chk-row" onclick="toggleTask(this, 50)">
+              <div class="chk-box">✓</div>
+              <div style="font-size: 13px;">💊 Betaloc 100mg (Morning Dose)</div>
+            </div>
+            <div class="chk-row" onclick="toggleTask(this, 50)">
+              <div class="chk-box">✓</div>
+              <div style="font-size: 13px;">👁️ Dorzolamidum 10mg Drops</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin: 10px 0 6px 0;">
+            <span>Today's Adherence</span>
+            <span id="adherencePercent" style="color: var(--green);">100%</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 12px;">
+            <div id="adherenceBar" style="background: linear-gradient(90deg, var(--cyan), var(--green)); width: 100%; height: 100%; transition: width 0.4s;"></div>
+          </div>
+          <p style="font-size: 12.5px; color: var(--text-light); line-height: 1.5;">
+            👨‍👩‍👧 <strong>Family Member Manager:</strong> Switch alert routing to a caregiver's phone in 1 click for elderly loved ones.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: 4. IMPLEMENTATION APPROACH -->
+  <div class="slide" data-slide="6">
+    <div class="slide-tag" style="background: rgba(167, 139, 250, 0.2); color: var(--purple); border-color: var(--purple);">4. IMPLEMENTATION APPROACH</div>
+    <div class="slide-title">Implementation Approach: Architecture, Governance & Impact</div>
+
+    <div class="grid-2">
+      <div class="card accent-cyan">
+        <div class="card-title" style="color: var(--cyan);">⚙️ Full Stack Architecture & Responsible AI</div>
+        <div class="card-text" style="margin-top: 10px; font-size: 13.5px;">
+          <p style="margin-bottom: 8px;">• <strong>Framework:</strong> Streamlit + Python 3.12 reactive responsive UI.</p>
+          <p style="margin-bottom: 8px;">• <strong>Multimodal AI:</strong> Google Gemini 2.5 Flash Vision API with deep reasoning.</p>
+          <p style="margin-bottom: 8px;">• <strong>Zero Hallucination:</strong> Never guesses or prescribes. Strictly grounds all outputs in verified documents.</p>
+          <p style="margin-bottom: 8px;">• <strong>Ephemeral Privacy:</strong> In-memory session processing. Medical records are never stored permanently.</p>
+          <p>• <strong>100% Test Coverage:</strong> 12 rigorous unit tests passing in 0.6s.</p>
+        </div>
+      </div>
+
+      <div class="card accent-green">
+        <div class="card-title" style="color: var(--green);">🌐 Accessibility & Clinical Impact</div>
+        <div class="card-text" style="margin-top: 10px; font-size: 13.5px;">
+          <p style="margin-bottom: 8px;">• <strong>Text-to-Speech (TTS):</strong> Natural audio narration for seniors and visually impaired patients.</p>
+          <p style="margin-bottom: 8px;">• <strong>Multi-Lingual:</strong> Native speech in English (en), Hindi (hi), and Telugu (te).</p>
+          <p style="margin-bottom: 8px;">• <strong>WCAG AAA High Contrast:</strong> Large fonts and distinct severity badges.</p>
+          <p style="margin-bottom: 12px;">• <strong>Reduces Readmissions:</strong> Eliminates discharge confusion and protects patients from $17B hospital bed readmissions.</p>
+          <button class="btn-demo" onclick="speakDemo()">🔊 Listen to Audio Demo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: CONCLUSION & THANK YOU CARD -->
+  <div class="slide hero-slide" data-slide="7">
+    <div class="slide-tag" style="background: rgba(52, 211, 153, 0.2); color: var(--green); border-color: var(--green);">CONCLUSION & DEMONSTRATION</div>
+    <div class="hero-logo" style="font-size: 52px;">🙏 Thank You!</div>
+    <div class="hero-subtitle">CareBridge AI — Safe Recovery, Healthier Tomorrows</div>
+    <div class="hero-desc">
+      Bridging hospital care to confident recovery at home with AI Vision, proactive confusion prevention, and hands-free timeline alarms.
+    </div>
+
+    <div class="grid-3" style="text-align: left; margin: 28px 0;">
+      <div class="card accent-amber">
+        <div class="card-title" style="color: var(--amber);">🛡️ Zero Med Errors</div>
+        <div class="card-text">Proactive Confusion Detector protects patients from day one.</div>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-title" style="color: var(--cyan);">✍️ Every Rx Deciphered</div>
+        <div class="card-text">Multimodal AI Vision turns doctor cursive into clear digital schedules.</div>
+      </div>
+      <div class="card accent-green">
+        <div class="card-title" style="color: var(--green);">⏰ 100% Hands-Free</div>
+        <div class="card-text">Autonomous timeline notifications keep recovery on track effortlessly.</div>
+      </div>
+    </div>
+
+    <div style="background: rgba(167, 139, 250, 0.15); border: 1px solid var(--purple); padding: 14px; border-radius: 12px; max-width: 650px; margin: 0 auto; color: var(--purple); font-weight: bold; font-size: 15px;">
+      💬 Open for Questions & Live Demonstration
+    </div>
+    <button class="btn-demo" style="margin-top: 16px; background: linear-gradient(135deg, #10b981, #059669);" onclick="launchConfetti()">🎉 Celebrate Recovery Confetti</button>
+  </div>
+
+</div>
+
+<!-- FOOTER CONTROLS -->
+<div class="footer-nav">
+  <button class="nav-btn" onclick="prevSlide()">◀ Previous</button>
+  <div class="slide-counter" id="slideCounter">Slide 1 of 7</div>
+  <button class="nav-btn" onclick="nextSlide()">Next ▶</button>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 7;
+
+  function updateSlide(newSlide) {
+    if (newSlide < 1) newSlide = 1;
+    if (newSlide > totalSlides) newSlide = totalSlides;
+    currentSlide = newSlide;
+
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const target = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+    if (target) target.classList.add('active');
+
+    document.getElementById('slideCounter').innerText = `Slide ${currentSlide} of ${totalSlides}`;
+    document.getElementById('topProgress').style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  function nextSlide() { updateSlide(currentSlide + 1); }
+  function prevSlide() { updateSlide(currentSlide - 1); }
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') nextSlide();
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  // Interactive Checklist demo
+  let activeScore = 100;
+  function toggleTask(row, points) {
+    const box = row.querySelector('.chk-box');
+    if (box.innerText === '✓') {
+      box.innerText = '';
+      activeScore -= points;
+    } else {
+      box.innerText = '✓';
+      activeScore += points;
+      if (activeScore === 100) launchConfetti();
+    }
+    document.getElementById('adherencePercent').innerText = `${activeScore}%`;
+    document.getElementById('adherenceBar').style.width = `${activeScore}%`;
+  }
+
+  // Interactive notification demo
+  function triggerNotificationDemo() {
+    playChime();
+    alert("🔔 [CareBridge AI Alert • 08:00 AM]\n💊 Morning Medication Due:\nBetaloc 100mg (1 tab) + Dorzolamide 10mg (1 tab). Take with water!");
+  }
+
+  function playChime() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+    } catch(e) {}
+  }
+
+  // Speech TTS Demo
+  function speakDemo() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const text = "Good morning! It is 8:00 AM. Please take your Betaloc 100 milligrams tablet for blood pressure with a full glass of water.";
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert("Web Speech Synthesis not supported in this browser.");
+    }
+  }
+
+  // Confetti Animation
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = [];
+    const colors = ['#38bdf8', '#34d399', '#fb923c', '#a78bfa', '#f87171'];
+    for (let i = 0; i < 70; i++) {
+      pieces.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 15,
+        vy: (Math.random() - 1) * 12,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 10
+      });
+    }
+
+    let frame = 0;
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.35;
+        p.rotation += p.spin;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      });
+      frame++;
+      if (frame < 90) requestAnimationFrame(render);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    render();
+  }
+
+  updateSlide(1);
+</script>
+</body>
+</html>

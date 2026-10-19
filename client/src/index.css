@@ -30,15 +30,18 @@
   --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   min-width: 0;
 }
 
-html, body, #root, .carebridge-landing-page {
-  overflow-x: hidden !important;
+html,
+body {
+  overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
 }
@@ -133,7 +136,8 @@ body {
   position: relative;
 }
 
-.nav-link-btn:hover, .nav-link-btn.active {
+.nav-link-btn:hover,
+.nav-link-btn.active {
   color: #4f46e5;
 }
 
@@ -260,7 +264,8 @@ body {
   transition: var(--transition);
 }
 
-.mobile-nav-link:hover, .mobile-nav-link.active {
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
   background: #eef2ff;
   border-color: #c7d2fe;
   color: #4f46e5;
@@ -933,12 +938,17 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
-  .hero-dribbble-inner, .about-dribbble-section, .why-us-section {
+
+  .hero-dribbble-inner,
+  .about-dribbble-section,
+  .why-us-section {
     grid-template-columns: 1fr;
   }
+
   .quick-action-cards-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .services-grid-6 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -975,13 +985,25 @@ body {
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modalPop {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .auth-tabs-row {
@@ -1203,39 +1225,48 @@ body {
   .nav-menu-dribbble {
     gap: 1rem;
   }
+
   .nav-link-btn {
     font-size: 0.85rem;
   }
+
   .quick-action-row {
     padding: 0 1.5rem;
     margin: -2rem auto 3rem auto;
   }
+
   .quick-action-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
+
   .services-dribbble-section {
     padding: 0 1.5rem;
     margin-bottom: 3.5rem;
   }
+
   .services-grid-6 {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
   }
+
   .about-dribbble-section {
     grid-template-columns: 1fr;
     gap: 2.5rem;
     padding: 0 1.5rem 3.5rem 1.5rem;
   }
+
   .why-us-section {
     grid-template-columns: 1fr;
     gap: 2.5rem;
     padding: 0 1.5rem 3.5rem 1.5rem;
   }
+
   .workspace-section {
     padding: 0 1.5rem;
     margin-bottom: 3.5rem;
   }
+
   .workspace-body {
     padding: 2rem 1.5rem;
   }
@@ -1243,8 +1274,12 @@ body {
 
 /* All Mobile Devices and Small Screens (<= 768px) */
 @media (max-width: 768px) {
+
   /* Global Container Bounds */
-  html, body, #root, .carebridge-landing-page {
+  html,
+  body,
+  #root,
+  .carebridge-landing-page {
     overflow-x: hidden !important;
     width: 100% !important;
     max-width: 100vw !important;
@@ -1254,18 +1289,23 @@ body {
   .nav-menu-dribbble {
     display: none !important;
   }
+
   .search-box-pill.desktop-only {
     display: none !important;
   }
+
   .btn-signin-pill.desktop-only {
     display: none !important;
   }
+
   .mobile-hamburger-btn {
     display: flex !important;
   }
+
   .navbar-container {
     padding: 0.75rem 1rem !important;
   }
+
   .logo-text {
     font-size: 1.15rem !important;
   }
@@ -1275,26 +1315,31 @@ body {
     padding: 2rem 1rem 3rem 1rem !important;
     overflow: hidden !important;
   }
+
   .hero-dribbble-inner {
     grid-template-columns: 1fr !important;
     gap: 2rem !important;
   }
+
   .hero-heading {
     font-size: clamp(1.9rem, 6.5vw, 2.8rem) !important;
     line-height: 1.15 !important;
     letter-spacing: -0.5px !important;
     word-break: break-word !important;
   }
+
   .hero-paragraph {
     font-size: 0.95rem !important;
     line-height: 1.6 !important;
     margin-bottom: 1.75rem !important;
   }
+
   .hero-doctor-wrapper {
     max-width: 320px !important;
     margin: 1rem auto 0 auto !important;
     width: 100% !important;
   }
+
   .hero-action-pill-bar {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -1304,25 +1349,31 @@ body {
     width: 100% !important;
     max-width: 100% !important;
   }
+
   .hero-divider {
     display: none !important;
   }
+
   .btn-hero-launch {
     width: 100% !important;
     justify-content: center !important;
   }
+
   .floating-badge {
     font-size: 0.725rem !important;
     padding: 6px 10px !important;
   }
+
   .floating-badge.badge-cardiology {
     top: 5% !important;
     left: 2px !important;
   }
+
   .floating-badge.badge-neurology {
     bottom: 18% !important;
     left: 2px !important;
   }
+
   .floating-badge.badge-orthopedics {
     bottom: 5% !important;
     right: 2px !important;
@@ -1333,11 +1384,13 @@ body {
     padding: 0 1rem !important;
     margin: -1.5rem auto 2.5rem auto !important;
   }
+
   .quick-action-cards-grid {
     grid-template-columns: 1fr !important;
     gap: 0.75rem !important;
     width: 100% !important;
   }
+
   .dribbble-action-card {
     padding: 1.25rem 1rem !important;
     width: 100% !important;
@@ -1349,6 +1402,7 @@ body {
     gap: 2rem !important;
     padding: 0 1rem 3rem 1rem !important;
   }
+
   .about-heading {
     font-size: 1.8rem !important;
     line-height: 1.25 !important;
@@ -1359,15 +1413,18 @@ body {
     padding: 0 1rem !important;
     margin-bottom: 3rem !important;
   }
+
   .services-heading {
     font-size: 1.75rem !important;
     line-height: 1.25 !important;
   }
+
   .services-grid-6 {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
     width: 100% !important;
   }
+
   .service-card-dribbble {
     padding: 1.5rem 1.25rem !important;
     width: 100% !important;
@@ -1380,12 +1437,14 @@ body {
     width: 100% !important;
     max-width: 100% !important;
   }
+
   .workspace-card {
     border-radius: 18px !important;
     width: 100% !important;
     max-width: 100% !important;
     overflow: hidden !important;
   }
+
   .workspace-tabs-header {
     padding: 0.5rem 0.5rem 0 0.5rem !important;
     gap: 6px !important;
@@ -1397,9 +1456,11 @@ body {
     width: 100% !important;
     max-width: 100% !important;
   }
+
   .workspace-tabs-header::-webkit-scrollbar {
     display: none !important;
   }
+
   .ws-tab-btn {
     padding: 0.75rem 1rem !important;
     font-size: 0.825rem !important;
@@ -1407,6 +1468,7 @@ body {
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
+
   .workspace-body {
     padding: 1.25rem 0.875rem !important;
     width: 100% !important;
@@ -1420,20 +1482,24 @@ body {
     gap: 1.5rem !important;
     width: 100% !important;
   }
+
   .diet-inputs-grid {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
     width: 100% !important;
   }
+
   .diet-columns-grid {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
     width: 100% !important;
   }
+
   .search-input-group {
     flex-direction: column !important;
     gap: 0.75rem !important;
   }
+
   .search-input-group button {
     width: 100% !important;
   }
@@ -1444,13 +1510,16 @@ body {
     gap: 2rem !important;
     padding: 0 1rem 3rem 1rem !important;
   }
+
   .why-us-heading {
     font-size: 1.75rem !important;
     line-height: 1.25 !important;
   }
+
   .why-us-item {
     padding: 1rem 1.25rem !important;
   }
+
   .doctor-hello-card {
     max-width: 100% !important;
   }
@@ -1461,6 +1530,7 @@ body {
     align-items: stretch !important;
     gap: 8px !important;
   }
+
   .adherence-stat-pill {
     width: 100% !important;
     justify-content: center !important;
@@ -1479,12 +1549,9 @@ body {
   .footer-dribbble {
     padding: 3rem 1rem 2rem 1rem !important;
   }
+
   .footer-dribbble-inner {
     grid-template-columns: 1fr !important;
     gap: 2rem !important;
   }
 }
-
-
-
-

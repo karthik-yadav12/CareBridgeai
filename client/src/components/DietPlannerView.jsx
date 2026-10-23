@@ -59,26 +59,30 @@ export default function DietPlannerView() {
         <div style={{ marginBottom: '1.5rem' }}>
           <label className="form-label">Select Clinical Condition Protocol</label>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem' }}>
-            {PRESET_CONDITIONS.map((cond, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCondition(cond)}
-                style={{
-                  background: condition === cond ? 'var(--primary)' : 'var(--bg-subtle)',
-                  color: condition === cond ? '#ffffff' : 'var(--text-main)',
-                  border: '1px solid var(--border-light)',
-                  padding: '6px 14px',
-                  borderRadius: '9999px',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {cond.split(' (')[0]}
-              </button>
-            ))}
+            {PRESET_CONDITIONS.map((cond, idx) => {
+              const isSelected = condition === cond;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCondition(cond)}
+                  style={{
+                    background: isSelected ? 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)' : '#eef2ff',
+                    color: isSelected ? '#ffffff' : '#4338ca',
+                    border: `1px solid ${isSelected ? '#4f46e5' : '#c7d2fe'}`,
+                    padding: '8px 16px',
+                    borderRadius: '9999px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: isSelected ? '0 4px 12px rgba(79, 70, 229, 0.25)' : 'none'
+                  }}
+                >
+                  {cond.split(' (')[0]}
+                </button>
+              );
+            })}
           </div>
 
           <input 
@@ -117,7 +121,14 @@ export default function DietPlannerView() {
           className="btn-primary" 
           onClick={handleGenerate} 
           disabled={loading}
-          style={{ width: '100%', justifyContent: 'center' }}
+          style={{ 
+            width: '100%', 
+            justifyContent: 'center',
+            padding: '14px 28px',
+            fontSize: '1rem',
+            marginTop: '0.5rem',
+            boxShadow: '0 6px 20px rgba(79, 70, 229, 0.32)'
+          }}
         >
           {loading ? 'Consulting Clinical Nutrition Engine...' : '🥗 Generate Clinical Recovery Diet'}
         </button>
@@ -144,14 +155,14 @@ export default function DietPlannerView() {
             {/* Foods to Emphasize & Avoid in 2 columns */}
             <div className="diet-columns-grid">
               {/* Emphasize */}
-              <div style={{ background: '#ecfdf5', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid #a7f3d0' }}>
-                <h4 style={{ color: '#065f46', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ background: '#eef2ff', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid #c7d2fe' }}>
+                <h4 style={{ color: '#312e81', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>🟢</span> Foods to Emphasize
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {result.foodsToEmphasize?.map((f, i) => (
                     <div key={i} style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid #d1fae5' }}>
-                      <strong style={{ color: '#047857' }}>{f.food}</strong>
+                      <strong style={{ color: '#4338ca' }}>{f.food}</strong>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginTop: '2px' }}>{f.benefit}</div>
                     </div>
                   ))}

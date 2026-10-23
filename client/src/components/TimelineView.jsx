@@ -155,7 +155,7 @@ export default function TimelineView({ setToastMessage }) {
                   key={item.id}
                   onClick={() => toggleItem(item.id, 'meds')}
                   style={{
-                    background: item.done ? '#f0fdf4' : '#ffffff',
+                    background: item.done ? '#f8fafc' : '#ffffff',
                     border: `1px solid ${item.done ? '#bbf7d0' : '#e2e8f0'}`,
                     borderRadius: 'var(--radius-md)',
                     padding: '10px 14px',
@@ -222,7 +222,7 @@ export default function TimelineView({ setToastMessage }) {
                   key={item.id}
                   onClick={() => toggleItem(item.id, 'advice')}
                   style={{
-                    background: item.done ? '#f0fdf4' : '#ffffff',
+                    background: item.done ? '#f8fafc' : '#ffffff',
                     border: `1px solid ${item.done ? '#bbf7d0' : '#e2e8f0'}`,
                     borderRadius: 'var(--radius-md)',
                     padding: '10px 14px',
@@ -264,7 +264,7 @@ export default function TimelineView({ setToastMessage }) {
                   key={item.id}
                   onClick={() => toggleItem(item.id, 'diet')}
                   style={{
-                    background: item.done ? '#f0fdf4' : '#ffffff',
+                    background: item.done ? '#f8fafc' : '#ffffff',
                     border: `1px solid ${item.done ? '#bbf7d0' : '#e2e8f0'}`,
                     borderRadius: 'var(--radius-md)',
                     padding: '10px 14px',

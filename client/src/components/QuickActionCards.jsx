@@ -44,7 +44,7 @@ export default function QuickActionCards({ onOpenWorkspace, openEmergencyModal }
           className="dribbble-action-card"
           onClick={() => onOpenWorkspace('timeline')}
         >
-          <div className="dribbble-card-icon" style={{ background: '#ecfdf5', color: '#059669' }}>
+          <div className="dribbble-card-icon" style={{ background: '#eef2ff', color: '#4f46e5' }}>
             ⏰
           </div>
           <div className="dribbble-card-text">

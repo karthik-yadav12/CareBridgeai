@@ -172,7 +172,7 @@ export default function HandwrittenOCRView() {
               {/* Header card with confidence score */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-light)' }}>
                 <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#059669', background: '#ecfdf5', padding: '3px 10px', borderRadius: '9999px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: '#4f46e5', background: '#eef2ff', padding: '3px 10px', borderRadius: '9999px' }}>
                     ✓ Converted to Normal Text ({result.confidenceScore || '96.4%'} Accuracy)
                   </span>
                   <h4 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--navy)', marginTop: '6px' }}>

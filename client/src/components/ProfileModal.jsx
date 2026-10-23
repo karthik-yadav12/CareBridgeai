@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../utils/apiConfig';
 
-export default function ProfileModal({ isOpen, onClose, userProfile, setUserProfile, setToastMessage }) {
+export default function ProfileModal({ isOpen, onClose, userProfile, setUserProfile, setToastMessage, onLoginSuccess }) {
   if (!isOpen) return null;
 
   const [authMode, setAuthMode] = useState('signin'); // 'signin' | 'register'
@@ -40,6 +40,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
         localStorage.setItem('carebridge_user', JSON.stringify(loggedUser));
         setToastMessage(`Welcome back, ${loggedUser.name}!`);
         onClose();
+        if (onLoginSuccess) onLoginSuccess(loggedUser);
       } else {
         // Fallback local login if backend file is unreachable
         if (password.length >= 4) {
@@ -52,6 +53,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
           localStorage.setItem('carebridge_user', JSON.stringify(fallbackUser));
           setToastMessage(`Welcome, ${fallbackUser.name}!`);
           onClose();
+          if (onLoginSuccess) onLoginSuccess(fallbackUser);
         } else {
           setError(data.error || 'Invalid credentials.');
         }
@@ -67,6 +69,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
       localStorage.setItem('carebridge_user', JSON.stringify(fallbackUser));
       setToastMessage(`Welcome, ${fallbackUser.name}!`);
       onClose();
+      if (onLoginSuccess) onLoginSuccess(fallbackUser);
     } finally {
       setLoading(false);
     }
@@ -102,6 +105,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
         localStorage.setItem('carebridge_user', JSON.stringify(loggedUser));
         setToastMessage(`Account created! Welcome, ${loggedUser.name}!`);
         onClose();
+        if (onLoginSuccess) onLoginSuccess(loggedUser);
       } else {
         setError(data.error || 'Failed to create account.');
       }
@@ -118,6 +122,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
       localStorage.setItem('carebridge_user', JSON.stringify(localUser));
       setToastMessage(`Welcome, ${localUser.name}!`);
       onClose();
+      if (onLoginSuccess) onLoginSuccess(localUser);
     } finally {
       setLoading(false);
     }
@@ -140,6 +145,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
       localStorage.setItem('carebridge_user', JSON.stringify(demoUser));
       setToastMessage('Signed in as Demo Patient: Sarah Jenkins');
       onClose();
+      if (onLoginSuccess) onLoginSuccess(demoUser);
     }, 150);
   };
 
@@ -175,29 +181,114 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
           </p>
         </div>
 
-        {/* Tab Switcher: Sign In vs Register */}
-        <div className="auth-tabs-row">
-          <button 
-            type="button"
-            className={`auth-tab-btn ${authMode === 'signin' ? 'active' : ''}`}
-            onClick={() => { setAuthMode('signin'); setError(''); }}
-          >
-            Sign In
-          </button>
-          <button 
-            type="button"
-            className={`auth-tab-btn ${authMode === 'register' ? 'active' : ''}`}
-            onClick={() => { setAuthMode('register'); setError(''); }}
-          >
-            Create Account
-          </button>
-        </div>
+        {/* Logged in state */}
+        {userProfile?.isLoggedIn ? (
+          <div>
+            <div style={{
+              padding: '1.25rem',
+              background: '#f8fafc',
+              borderRadius: '16px',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.25rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '50%',
+                  background: '#4f46e5',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 800,
+                  fontSize: '1.2rem'
+                }}>
+                  {userProfile.name ? userProfile.name[0].toUpperCase() : 'P'}
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--navy)' }}>
+                    {userProfile.name}
+                  </h4>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    {userProfile.email || userProfile.phone || 'Signed In Patient'}
+                  </span>
+                </div>
+              </div>
 
-        {error && (
-          <div style={{ padding: '10px 14px', background: 'var(--danger-light)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1rem' }}>
-            {error}
+              {userProfile.diagnosis && (
+                <div style={{ fontSize: '0.85rem', color: '#334155', marginBottom: '6px' }}>
+                  <strong>Diagnosis:</strong> {userProfile.diagnosis}
+                </div>
+              )}
+              {userProfile.emergencyContact && (
+                <div style={{ fontSize: '0.85rem', color: '#334155' }}>
+                  <strong>Caregiver / Emergency:</strong> {userProfile.emergencyContact}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn-auth-submit"
+                onClick={() => {
+                  onClose();
+                  if (onLoginSuccess) onLoginSuccess(userProfile);
+                }}
+              >
+                📊 Go to Recovery Dashboard
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const cleared = { name: '', email: '', phone: '', diagnosis: '', isLoggedIn: false };
+                  setUserProfile(cleared);
+                  localStorage.removeItem('carebridge_user');
+                  localStorage.removeItem('carebridge_auth_token');
+                  setToastMessage('Signed out successfully.');
+                  onClose();
+                }}
+                style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#dc2626',
+                  padding: '10px',
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
-        )}
+        ) : (
+          <>
+            {/* Tab Switcher: Sign In vs Register */}
+            <div className="auth-tabs-row">
+              <button 
+                type="button"
+                className={`auth-tab-btn ${authMode === 'signin' ? 'active' : ''}`}
+                onClick={() => { setAuthMode('signin'); setError(''); }}
+              >
+                Sign In
+              </button>
+              <button 
+                type="button"
+                className={`auth-tab-btn ${authMode === 'register' ? 'active' : ''}`}
+                onClick={() => { setAuthMode('register'); setError(''); }}
+              >
+                Create Account
+              </button>
+            </div>
+
+            {error && (
+              <div style={{ padding: '10px 14px', background: 'var(--danger-light)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1rem' }}>
+                {error}
+              </div>
+            )}
 
         {/* Sign In Form */}
         {authMode === 'signin' && (
@@ -298,6 +389,8 @@ export default function ProfileModal({ isOpen, onClose, userProfile, setUserProf
               {loading ? 'Creating Account...' : 'Create Account & Start Recovery Plan'}
             </button>
           </form>
+        )}
+          </>
         )}
       </div>
     </div>

@@ -51,7 +51,7 @@ export default function ConfusionGuardView() {
       case 'critical': return { bg: '#fef2f2', border: '#f87171', text: '#b91c1c' };
       case 'high': return { bg: '#fff7ed', border: '#fb923c', text: '#c2410c' };
       case 'moderate': return { bg: '#fffbeb', border: '#fcd34d', text: '#b45309' };
-      default: return { bg: '#ecfdf5', border: '#6ee7b7', text: '#047857' };
+      default: return { bg: '#eef2ff', border: '#6ee7b7', text: '#4338ca' };
     }
   };
 

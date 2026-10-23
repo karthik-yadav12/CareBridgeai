@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Hero({ onOpenWorkspace }) {
+export default function Hero({ onOpenWorkspace, isLoggedIn, onOpenDashboard }) {
   return (
     <section id="hero-section" className="hero-dribbble">
       <div className="hero-dribbble-inner">
@@ -21,8 +21,8 @@ export default function Hero({ onOpenWorkspace }) {
           </p>
 
           <div className="hero-action-pill-bar">
-            <div className="hero-select-segment" onClick={() => onOpenWorkspace('handwritten')}>
-              <span>✍️ Handwritten OCR</span>
+            <div className="hero-select-segment" onClick={() => onOpenWorkspace('prescriptions')}>
+              <span>💊 Latest Prescriptions</span>
               <span style={{ fontSize: '0.75rem' }}>⌵</span>
             </div>
 
@@ -33,13 +33,24 @@ export default function Hero({ onOpenWorkspace }) {
               <span style={{ fontSize: '0.75rem' }}>⌵</span>
             </div>
 
-            <button 
-              className="btn-hero-launch" 
-              onClick={() => onOpenWorkspace('handwritten')}
-            >
-              <span>Scan Prescription</span>
-              <span>→</span>
-            </button>
+            {isLoggedIn && onOpenDashboard ? (
+              <button 
+                className="btn-hero-launch" 
+                onClick={onOpenDashboard}
+                style={{ background: '#4f46e5' }}
+              >
+                <span>Open Dashboard</span>
+                <span>→</span>
+              </button>
+            ) : (
+              <button 
+                className="btn-hero-launch" 
+                onClick={() => onOpenWorkspace('upload')}
+              >
+                <span>Upload Prescription</span>
+                <span>→</span>
+              </button>
+            )}
           </div>
         </div>
 

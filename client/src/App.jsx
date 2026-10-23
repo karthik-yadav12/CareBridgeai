@@ -12,6 +12,7 @@ import WhyPatientsChooseUs from './components/WhyPatientsChooseUs';
 import ProfileModal from './components/ProfileModal';
 import EmergencyModal from './components/EmergencyModal';
 import Footer from './components/Footer';
+import DashboardPortal from './components/DashboardPortal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('handwritten');
@@ -30,6 +31,31 @@ export default function App() {
     }
   });
 
+  // If user is logged in, default directly to 'dashboard'
+  const [currentView, setCurrentView] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('carebridge_user');
+      const savedView = localStorage.getItem('carebridge_current_view');
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        if (u?.isLoggedIn || (u?.name && u.name.trim().length > 0)) {
+          return savedView || 'dashboard';
+        }
+      }
+    } catch {}
+    return 'landing';
+  });
+
+  // Keep view choice persisted
+  useEffect(() => {
+    try {
+      localStorage.setItem('carebridge_current_view', currentView);
+    } catch {}
+  }, [currentView]);
+
+  // Dashboard initial step state
+  const [dashboardInitialStep, setDashboardInitialStep] = useState('overview');
+
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => {
@@ -40,12 +66,98 @@ export default function App() {
   }, [toastMessage]);
 
   const handleOpenWorkspace = (tabName) => {
-    setActiveTab(tabName);
-    setTimeout(() => {
-      const el = document.getElementById('workspace-section');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    let mapped = tabName;
+    if (tabName === 'handwritten') mapped = 'verify';
+    else if (tabName === 'timeline') mapped = 'reminders';
+    else if (tabName === 'document') mapped = 'upload';
+    
+    setDashboardInitialStep(mapped);
+
+    if (userProfile?.isLoggedIn || (userProfile?.name && userProfile.name.trim().length > 0)) {
+      setCurrentView('dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setIsProfileOpen(true);
+      setToastMessage('Please sign in or use 1-click Demo Login to access your Patient Dashboard & Recovery tools.');
+    }
   };
+
+  const handleLoginSuccess = (user) => {
+    setCurrentView('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSignOut = () => {
+    const cleared = { name: '', phone: '', diagnosis: '', isLoggedIn: false };
+    setUserProfile(cleared);
+    localStorage.removeItem('carebridge_user');
+    localStorage.removeItem('carebridge_auth_token');
+    setCurrentView('landing');
+    setDashboardInitialStep('overview');
+    setToastMessage('Signed out successfully.');
+  };
+
+  // If viewing the patient recovery dashboard
+  if (currentView === 'dashboard') {
+    return (
+      <div className="carebridge-app">
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <div style={{
+            position: 'fixed',
+            top: '20px',
+            right: '24px',
+            zIndex: 9999,
+            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+            color: '#ffffff',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '0.875rem',
+            fontWeight: 700,
+            maxWidth: '420px',
+            border: '1px solid rgba(255, 255, 255, 0.15)'
+          }}>
+            <span>{toastMessage}</span>
+            <button 
+              onClick={() => setToastMessage('')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#ffffff', fontSize: '1rem', padding: '0 4px' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        <DashboardPortal 
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          onViewLandingPage={() => setCurrentView('landing')}
+          openEmergencyModal={() => setIsEmergencyOpen(true)}
+          openProfileModal={() => setIsProfileOpen(true)}
+          setToastMessage={setToastMessage}
+          onSignOut={handleSignOut}
+          initialStep={dashboardInitialStep}
+        />
+
+        <ProfileModal 
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          setToastMessage={setToastMessage}
+          onLoginSuccess={handleLoginSuccess}
+        />
+
+        <EmergencyModal 
+          isOpen={isEmergencyOpen}
+          onClose={() => setIsEmergencyOpen(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="carebridge-landing-page">
@@ -58,6 +170,8 @@ export default function App() {
         openProfileModal={() => setIsProfileOpen(true)}
         openEmergencyModal={() => setIsEmergencyOpen(true)}
         setToastMessage={setToastMessage}
+        onOpenDashboard={() => setCurrentView('dashboard')}
+        onSignOut={handleSignOut}
       />
 
       {/* Toast Notification Banner */}
@@ -83,82 +197,29 @@ export default function App() {
         </div>
       )}
 
-      {/* 3. Hero Section (Dribbble Layout) */}
-      <Hero onOpenWorkspace={handleOpenWorkspace} />
+      {/* 2. Hero Section (Clean Dribbble Layout with Call-To-Action) */}
+      <Hero 
+        onOpenWorkspace={handleOpenWorkspace} 
+        isLoggedIn={Boolean(userProfile?.isLoggedIn || userProfile?.name)}
+        onOpenDashboard={() => setCurrentView('dashboard')}
+      />
 
-      {/* 4. Floating 4 Quick Action Cards */}
+      {/* 3. Floating Quick Action Cards (Routes to Patient Portal) */}
       <QuickActionCards 
         onOpenWorkspace={handleOpenWorkspace} 
         openEmergencyModal={() => setIsEmergencyOpen(true)}
       />
 
-      {/* 5. About Us Section (Hospital Team Photo & TrustScore) */}
+      {/* 4. About Us Section (Hospital Team Photo & TrustScore) */}
       <AboutTrustSection onOpenWorkspace={handleOpenWorkspace} />
 
-      {/* 6. Services Grid (6 Cards from Dribbble) */}
+      {/* 5. Services Grid (6 Clinical Recovery Pillars) */}
       <ServicesGrid onOpenWorkspace={handleOpenWorkspace} />
 
-      {/* 7. The Core Interactive Clinical Tool Workspace */}
-      <section id="workspace-section" className="workspace-section">
-        <div className="workspace-card">
-          <div className="workspace-tabs-header">
-            <button 
-              className={`ws-tab-btn ${activeTab === 'handwritten' ? 'active' : ''}`}
-              onClick={() => setActiveTab('handwritten')}
-            >
-              <span>✍️</span>
-              <span>Handwritten Prescription OCR</span>
-            </button>
-
-            <button 
-              className={`ws-tab-btn ${activeTab === 'confusion' ? 'active' : ''}`}
-              onClick={() => setActiveTab('confusion')}
-            >
-              <span>🧠</span>
-              <span>Confusion Safety Guard</span>
-            </button>
-
-            <button 
-              className={`ws-tab-btn ${activeTab === 'timeline' ? 'active' : ''}`}
-              onClick={() => setActiveTab('timeline')}
-            >
-              <span>⏰</span>
-              <span>Recovery Timetable &amp; Alarms</span>
-            </button>
-
-            <button 
-              className={`ws-tab-btn ${activeTab === 'diet' ? 'active' : ''}`}
-              onClick={() => setActiveTab('diet')}
-            >
-              <span>🥗</span>
-              <span>Clinical Diet Plan</span>
-            </button>
-          </div>
-
-          <div className="workspace-body">
-            {activeTab === 'handwritten' && (
-              <HandwrittenOCRView />
-            )}
-
-            {activeTab === 'confusion' && (
-              <ConfusionGuardView />
-            )}
-
-            {activeTab === 'timeline' && (
-              <TimelineView setToastMessage={setToastMessage} />
-            )}
-
-            {activeTab === 'diet' && (
-              <DietPlannerView />
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Why Our Patients Recommend Us */}
+      {/* 6. Why Our Patients Recommend Us */}
       <WhyPatientsChooseUs onOpenWorkspace={handleOpenWorkspace} />
 
-      {/* 9. Hospital Footer */}
+      {/* 7. Hospital Footer */}
       <Footer onOpenWorkspace={handleOpenWorkspace} />
 
       {/* Modals */}
@@ -168,6 +229,7 @@ export default function App() {
         userProfile={userProfile}
         setUserProfile={setUserProfile}
         setToastMessage={setToastMessage}
+        onLoginSuccess={handleLoginSuccess}
       />
 
       <EmergencyModal 

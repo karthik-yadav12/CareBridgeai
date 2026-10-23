@@ -1,0 +1,286 @@
+// Prisma Schema for Discharge Care App
+// AI-Powered Post-Hospital Recovery Platform
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  PATIENT
+  CAREGIVER
+  CLINICIAN
+  ADMIN
+}
+
+enum AccessLevel {
+  FULL_ACCESS
+  LOG_ONLY
+  VIEW_ONLY
+}
+
+enum DoseStatus {
+  SCHEDULED
+  TAKEN
+  SKIPPED
+  UNCERTAIN
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  FLAGGED_UNCERTAIN
+  REJECTED
+}
+
+enum AppointmentStatus {
+  UPCOMING
+  COMPLETED
+  RESCHEDULED
+  CANCELLED
+}
+
+enum NotificationType {
+  MEDICATION_REMINDER
+  APPOINTMENT_REMINDER
+  PRESCRIPTION_VERIFICATION
+  CAREGIVER_UPDATE
+  EMERGENCY_ALERT
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  phone        String?
+  passwordHash String
+  fullName     String
+  role         Role      @default(PATIENT)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  patientProfiles   PatientProfile[]   @relation("PatientUser")
+  caregiverAccesses CaregiverAccess[]  @relation("CaregiverUser")
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+
+  @@index([email])
+}
+
+model PatientProfile {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation("PatientUser", fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth      DateTime?
+  diagnosis        String
+  hospitalName     String?
+  dischargeDate    DateTime?
+  allergies        String[]  @default([])
+  bloodGroup       String?
+  emergencyContact String?
+  preferredLang    String    @default("en") // "en" | "te"
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  caregiverAccesses   CaregiverAccess[]
+  prescriptions       PrescriptionDocument[]
+  medications         Medication[]
+  appointments        Appointment[]
+  dietaryInstructions DietaryInstruction[]
+  recoveryEntries     RecoveryEntry[]
+
+  @@index([userId])
+}
+
+model CaregiverAccess {
+  id          String      @id @default(uuid())
+  patientId   String
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  caregiverId String
+  caregiver   User        @relation("CaregiverUser", fields: [caregiverId], references: [id], onDelete: Cascade)
+  relationship String     // e.g. "Daughter", "Spouse", "Son", "Nurse"
+  accessLevel AccessLevel @default(FULL_ACCESS)
+  isApproved  Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([patientId, caregiverId])
+  @@index([patientId])
+  @@index([caregiverId])
+}
+
+model PrescriptionDocument {
+  id               String               @id @default(uuid())
+  patientId        String
+  patient          PatientProfile       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  fileName         String
+  fileUrl          String
+  fileType         String               // "image/jpeg", "application/pdf"
+  uploadedAt       DateTime             @default(now())
+  
+  // Relations
+  extractedData    ExtractedPrescription?
+  medications      Medication[]
+
+  @@index([patientId])
+}
+
+model ExtractedPrescription {
+  id                  String               @id @default(uuid())
+  prescriptionId      String               @unique
+  prescription        PrescriptionDocument @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  rawOcrText          String               @db.Text
+  detectedDoctor      String?
+  detectedClinic      String?
+  detectedDate        DateTime?
+  structuredJson      Json                 // Extracted items, schedules, dosages
+  uncertainFields     Json?                // Fields flagged as illegible or requiring confirmation
+  verificationStatus  VerificationStatus   @default(PENDING)
+  verifiedByUserId    String?
+  verifiedAt          DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model Medication {
+  id                  String               @id @default(uuid())
+  patientId           String
+  patient             PatientProfile       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  prescriptionDocId   String?
+  prescriptionDoc     PrescriptionDocument? @relation(fields: [prescriptionDocId], references: [id], onDelete: SetNull)
+  name                String
+  dosage              String               // e.g. "500 mg", "25 mg"
+  frequency           String               // e.g. "Twice daily with meals"
+  instructions        String?              // e.g. "Take after breakfast, do not crush"
+  criticalWarning     String?              // e.g. "High stent thrombosis risk if missed"
+  startDate           DateTime             @default(now())
+  endDate             DateTime?
+  isActive            Boolean              @default(true)
+  isVerified          Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  // Relations
+  schedules           MedicationSchedule[]
+  logs                MedicationLog[]
+
+  @@index([patientId])
+}
+
+model MedicationSchedule {
+  id           String      @id @default(uuid())
+  medicationId String
+  medication   Medication  @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  timeOfDay    String      // e.g. "08:00 AM", "01:00 PM", "08:00 PM"
+  slotName     String      // "Morning", "Afternoon", "Evening", "Night"
+  reminderEnabled Boolean  @default(true)
+  createdAt    DateTime    @default(now())
+
+  // Relations
+  logs         MedicationLog[]
+
+  @@index([medicationId])
+}
+
+model MedicationLog {
+  id           String              @id @default(uuid())
+  medicationId String
+  medication   Medication          @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  scheduleId   String?
+  schedule     MedicationSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  loggedAt     DateTime            @default(now())
+  status       DoseStatus          @default(TAKEN)
+  loggedByRole String              // "PATIENT" | "CAREGIVER"
+  loggedByName String              // e.g. "Sarah Jenkins" or "Pooja (Daughter)"
+  notes        String?             // e.g. "Taken with full glass of water"
+
+  @@index([medicationId])
+  @@index([loggedAt])
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  patientId       String
+  patient         PatientProfile    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorName      String
+  clinicName      String
+  specialty       String?           // e.g. "Cardiology Follow-Up"
+  appointmentDate DateTime
+  preparationNote String?           // e.g. "Fast 8 hours prior to blood work"
+  status          AppointmentStatus @default(UPCOMING)
+  reminderEnabled Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([patientId])
+  @@index([appointmentDate])
+}
+
+model DietaryInstruction {
+  id                 String         @id @default(uuid())
+  patientId          String
+  patient            PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  conditionProtocol  String         // e.g. "Post-Cardiac Stent Low Sodium"
+  dietaryRationale   String         @db.Text
+  recommendedFoods   Json           // Array of { food, benefit, indianAlternative }
+  foodsToAvoid       Json           // Array of { food, reason }
+  hydrationGoal      String?        // e.g. "2.0 - 2.5 Liters daily"
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([patientId])
+}
+
+model RecoveryEntry {
+  id           String         @id @default(uuid())
+  patientId    String
+  patient      PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  entryDate    DateTime       @default(now())
+  painLevel    Int            // 0 to 10
+  temperature  Float?         // in Fahrenheit e.g. 98.6
+  systolicBp   Int?           // e.g. 120
+  diastolicBp  Int?           // e.g. 80
+  energyScore  Int?           // 1 to 5
+  sleepQuality Int?           // 1 to 5
+  woundStatus  String?        // "Clean & Healing", "Mild Swelling", "Redness/Drainage"
+  notes        String?
+  loggedBy     String         // e.g. "Patient" or "Caregiver (Pooja)"
+  hasRedFlag   Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+
+  @@index([patientId])
+  @@index([entryDate])
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  message    String
+  isRead     Boolean          @default(false)
+  metadata   Json?            // e.g. { medicationId: "...", appointmentId: "..." }
+  createdAt  DateTime         @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String   // "VERIFIED_PRESCRIPTION", "LOGGED_MEDICATION", "SWITCHED_CAREGIVER"
+  details    Json?
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+}

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { playMedicalChime } from '../utils/audioChime';
 
-export default function Navbar({ 
-  activeTab, 
-  setActiveTab, 
-  userProfile, 
+export default function Navbar({
+  activeTab,
+  setActiveTab,
+  userProfile,
   setUserProfile,
-  openProfileModal, 
+  openProfileModal,
   openEmergencyModal,
-  setToastMessage 
+  setToastMessage,
+  onOpenDashboard,
+  onSignOut
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -30,12 +32,17 @@ export default function Navbar({
   };
 
   const handleSignOut = () => {
-    const cleared = { name: '', email: '', phone: '', diagnosis: '', isLoggedIn: false };
-    setUserProfile(cleared);
-    localStorage.removeItem('carebridge_user');
+    if (onSignOut) {
+      onSignOut();
+    } else {
+      const cleared = { name: '', email: '', phone: '', diagnosis: '', isLoggedIn: false };
+      setUserProfile(cleared);
+      localStorage.removeItem('carebridge_user');
+      localStorage.removeItem('carebridge_auth_token');
+      setToastMessage('Signed out successfully.');
+    }
     setDropdownOpen(false);
     setMobileMenuOpen(false);
-    setToastMessage('Signed out successfully.');
   };
 
   // Get 2-letter initials
@@ -50,57 +57,86 @@ export default function Navbar({
     <nav className="navbar-dribbble">
       <div className="navbar-container">
         {/* Brand Logo */}
-        <div className="logo-dribbble" onClick={() => scrollToSection('handwritten', 'hero-section')}>
-          <div className="logo-cross-icon">✚</div>
-          <div className="logo-text">CareBridge <span>AI</span></div>
+        <div 
+          className="logo-dribbble" 
+          onClick={() => scrollToSection('home', 'hero-section')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginRight: '3rem', flexShrink: 0 }}
+        >
+          <div className="logo-cross-icon" style={{
+            width: '34px',
+            height: '34px',
+            background: '#4f46e5',
+            borderRadius: '9px',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.15rem',
+            fontWeight: 900,
+            boxShadow: '0 4px 10px rgba(79, 70, 229, 0.3)'
+          }}>
+            ✚
+          </div>
+          <div className="logo-text" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.5px', color: '#1e1b4b', textTransform: 'uppercase' }}>
+            <span>CareBridge</span>
+            <span style={{ color: '#4f46e5', marginLeft: '6px' }}>AI</span>
+          </div>
         </div>
 
         {/* Desktop Nav Menu */}
         <ul className="nav-menu-dribbble">
           <li>
-            <button 
+            <button
               className={`nav-link-btn ${activeTab === 'home' ? 'active' : ''}`}
-              onClick={() => scrollToSection('handwritten', 'hero-section')}
+              onClick={() => scrollToSection('home', 'hero-section')}
             >
               Home
             </button>
           </li>
           <li>
-            <button 
+            <button
               className="nav-link-btn"
-              onClick={() => scrollToSection('handwritten', 'about-section')}
+              onClick={() => scrollToSection('about', 'about-section')}
             >
               About
             </button>
           </li>
           <li>
-            <button 
-              className={`nav-link-btn ${activeTab === 'handwritten' ? 'active' : ''}`}
-              onClick={() => scrollToSection('handwritten', 'workspace-section')}
+            <button
+              className="nav-link-btn"
+              onClick={() => scrollToSection('prescriptions')}
+            >
+              Prescriptions
+            </button>
+          </li>
+          <li>
+            <button
+              className={`nav-link-btn ${activeTab === 'verify' ? 'active' : ''}`}
+              onClick={() => scrollToSection('verify')}
             >
               Handwritten OCR
             </button>
           </li>
           <li>
-            <button 
+            <button
               className={`nav-link-btn ${activeTab === 'confusion' ? 'active' : ''}`}
-              onClick={() => scrollToSection('confusion', 'workspace-section')}
+              onClick={() => scrollToSection('confusion')}
             >
               Confusion Guard
             </button>
           </li>
           <li>
-            <button 
-              className={`nav-link-btn ${activeTab === 'timeline' ? 'active' : ''}`}
-              onClick={() => scrollToSection('timeline', 'workspace-section')}
+            <button
+              className={`nav-link-btn ${activeTab === 'reminders' ? 'active' : ''}`}
+              onClick={() => scrollToSection('reminders')}
             >
               Timetable &amp; Alarms
             </button>
           </li>
           <li>
-            <button 
+            <button
               className={`nav-link-btn ${activeTab === 'diet' ? 'active' : ''}`}
-              onClick={() => scrollToSection('diet', 'workspace-section')}
+              onClick={() => scrollToSection('diet')}
             >
               Diet Plan
             </button>
@@ -110,9 +146,9 @@ export default function Navbar({
         {/* Right Actions: Search, Chime, Profile / Sign In / Sign Out */}
         <div className="navbar-right-actions">
           <div className="search-box-pill desktop-only">
-            <input 
-              type="text" 
-              placeholder="Search..." 
+            <input
+              type="text"
+              placeholder="Search..."
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   scrollToSection('confusion', 'workspace-section');
@@ -122,79 +158,116 @@ export default function Navbar({
             <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>🔍</span>
           </div>
 
-          <button 
-            type="button" 
-            onClick={handleTestChime}
-            className="btn-signin-pill desktop-only"
-            title="Test Web Audio Chime"
-            style={{ padding: '8px 12px' }}
-          >
-            🔔
-          </button>
-
           {/* User Sign In / Profile dropdown */}
           {!userProfile?.isLoggedIn && !userProfile?.name ? (
-            <button 
-              className="btn-signin-pill" 
+            <button
+              className="btn-signin-pill"
               onClick={openProfileModal}
+              style={{
+                background: '#0f172a',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
             >
-              <span>👤</span>
-              <span className="signin-text">Sign In</span>
+              <span>Sign In</span>
             </button>
           ) : (
-            <div className="user-menu-wrapper">
-              <button 
-                className="user-pill-btn"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                <div className="user-avatar-initials">
-                  {getInitials(userProfile.name)}
-                </div>
-                <span className="user-name-text">{userProfile.name}</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>⌵</span>
-              </button>
-
-              {dropdownOpen && (
-                <div className="user-dropdown-card">
-                  <div className="dropdown-user-header">
-                    <strong>{userProfile.name}</strong>
-                    <span>{userProfile.diagnosis || 'Post-Discharge Recovery'}</span>
-                    {userProfile.phone && <span>📞 {userProfile.phone}</span>}
-                  </div>
-
-                  <button 
-                    className="dropdown-item-btn"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      scrollToSection('timeline', 'workspace-section');
-                    }}
-                  >
-                    ⏰ My Recovery Timetable
-                  </button>
-
-                  <button 
-                    className="dropdown-item-btn"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      openProfileModal();
-                    }}
-                  >
-                    ⚙️ Edit Clinical Profile
-                  </button>
-
-                  <button 
-                    className="dropdown-item-btn signout"
-                    onClick={handleSignOut}
-                  >
-                    🚪 Sign Out
-                  </button>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {onOpenDashboard && (
+                <button
+                  type="button"
+                  onClick={onOpenDashboard}
+                  style={{
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    fontSize: '0.825rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>Patient Dashboard →</span>
+                </button>
               )}
+
+              <div className="user-menu-wrapper">
+                <button
+                  className="user-pill-btn"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  <div className="user-avatar-initials">
+                    {getInitials(userProfile.name)}
+                  </div>
+                  <span className="user-name-text">{userProfile.name}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>⌵</span>
+                </button>
+
+                {dropdownOpen && (
+                  <div className="user-dropdown-card">
+                    <div className="dropdown-user-header">
+                      <strong>{userProfile.name}</strong>
+                      <span>{userProfile.diagnosis || 'Post-Discharge Recovery'}</span>
+                      {userProfile.phone && <span>📞 {userProfile.phone}</span>}
+                    </div>
+
+                    {onOpenDashboard && (
+                      <button
+                        className="dropdown-item-btn"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          onOpenDashboard();
+                        }}
+                      >
+                        📊 Open Recovery Dashboard
+                      </button>
+                    )}
+
+                    <button
+                      className="dropdown-item-btn"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        scrollToSection('timeline', 'workspace-section');
+                      }}
+                    >
+                      ⏰ My Recovery Timetable
+                    </button>
+
+                    <button
+                      className="dropdown-item-btn"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        openProfileModal();
+                      }}
+                    >
+                      ⚙️ Edit Clinical Profile
+                    </button>
+
+                    <button
+                      className="dropdown-item-btn signout"
+                      onClick={handleSignOut}
+                    >
+                      🚪 Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Mobile Hamburger Button */}
-          <button 
+          <button
             className="mobile-hamburger-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
@@ -209,49 +282,57 @@ export default function Navbar({
         <div className="mobile-nav-drawer">
           <ul className="mobile-nav-list">
             <li>
-              <button 
+              <button
                 className={`mobile-nav-link ${activeTab === 'home' ? 'active' : ''}`}
-                onClick={() => scrollToSection('handwritten', 'hero-section')}
+                onClick={() => scrollToSection('home', 'hero-section')}
               >
                 🏠 Home
               </button>
             </li>
             <li>
-              <button 
+              <button
                 className="mobile-nav-link"
-                onClick={() => scrollToSection('handwritten', 'about-section')}
+                onClick={() => scrollToSection('about', 'about-section')}
               >
                 ℹ️ About CareBridge
               </button>
             </li>
             <li>
-              <button 
-                className={`mobile-nav-link ${activeTab === 'handwritten' ? 'active' : ''}`}
-                onClick={() => scrollToSection('handwritten', 'workspace-section')}
+              <button
+                className="mobile-nav-link"
+                onClick={() => scrollToSection('prescriptions')}
+              >
+                💊 Latest Prescriptions
+              </button>
+            </li>
+            <li>
+              <button
+                className={`mobile-nav-link ${activeTab === 'verify' ? 'active' : ''}`}
+                onClick={() => scrollToSection('verify')}
               >
                 📝 Handwritten Prescription OCR
               </button>
             </li>
             <li>
-              <button 
+              <button
                 className={`mobile-nav-link ${activeTab === 'confusion' ? 'active' : ''}`}
-                onClick={() => scrollToSection('confusion', 'workspace-section')}
+                onClick={() => scrollToSection('confusion')}
               >
                 🧠 Confusion &amp; LASA Guard
               </button>
             </li>
             <li>
-              <button 
-                className={`mobile-nav-link ${activeTab === 'timeline' ? 'active' : ''}`}
-                onClick={() => scrollToSection('timeline', 'workspace-section')}
+              <button
+                className={`mobile-nav-link ${activeTab === 'reminders' ? 'active' : ''}`}
+                onClick={() => scrollToSection('reminders')}
               >
                 ⏰ Timetable &amp; Hourly Alarms
               </button>
             </li>
             <li>
-              <button 
+              <button
                 className={`mobile-nav-link ${activeTab === 'diet' ? 'active' : ''}`}
-                onClick={() => scrollToSection('diet', 'workspace-section')}
+                onClick={() => scrollToSection('diet')}
               >
                 🥗 Clinical Diet Planner
               </button>
@@ -259,8 +340,22 @@ export default function Navbar({
           </ul>
 
           <div className="mobile-drawer-footer">
-            <button 
-              type="button" 
+            {userProfile?.isLoggedIn && onOpenDashboard && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenDashboard();
+                }}
+                className="btn-mobile-action"
+                style={{ background: '#4f46e5', color: '#ffffff', fontWeight: 800 }}
+              >
+                📊 Open Recovery Dashboard
+              </button>
+            )}
+
+            <button
+              type="button"
               onClick={() => {
                 handleTestChime();
                 setMobileMenuOpen(false);
@@ -271,8 +366,8 @@ export default function Navbar({
             </button>
 
             {userProfile?.isLoggedIn && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={handleSignOut}
                 className="btn-mobile-action signout"
               >

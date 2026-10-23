@@ -5,6 +5,14 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import {
+  handleRegister,
+  handleLogin,
+  handleGoogleAuth,
+  handleGetMe,
+  handleUpdateProfile
+} from './auth.js';
+import v1Router from './api_v1.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +28,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Mount /api/v1 REST API
+app.use('/api/v1', v1Router);
 
 // Multer memory storage for file uploads
 const upload = multer({
@@ -175,107 +186,13 @@ function getClinicalFallbackResponse(prompt) {
   });
 }
 
-// Authentication & User Data Persistence
-const USERS_FILE = path.join(__dirname, 'data/users.json');
+// Authentication & Patient Identity Routes
+app.post('/api/auth/register', handleRegister);
+app.post('/api/auth/login', handleLogin);
+app.post('/api/auth/google', handleGoogleAuth);
+app.get('/api/auth/me', handleGetMe);
+app.put('/api/auth/profile', handleUpdateProfile);
 
-function getUsers() {
-  try {
-    if (fs.existsSync(USERS_FILE)) {
-      return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    }
-  } catch (e) {
-    console.error('Error reading users file:', e);
-  }
-  // Default seed user
-  return [
-    {
-      id: 'demo-user-1',
-      name: 'Sarah Jenkins',
-      email: 'sarah@carebridge.ai',
-      phone: '+1 (555) 019-2834',
-      password: 'password123',
-      diagnosis: 'Acute Coronary Syndrome s/p LAD Stent Placement',
-      emergencyContact: 'Mark Jenkins (Spouse) - +1 555-019-9999',
-      createdAt: new Date().toISOString()
-    }
-  ];
-}
-
-function saveUsers(users) {
-  try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
-  } catch (e) {
-    console.error('Error saving users file:', e);
-  }
-}
-
-// 1. Auth Register
-app.post('/api/auth/register', (req, res) => {
-  const { name, emailOrPhone, password, diagnosis = '', emergencyContact = '' } = req.body;
-  if (!name || !emailOrPhone || !password) {
-    return res.status(400).json({ success: false, error: 'Full name, email/phone, and password are required.' });
-  }
-
-  const users = getUsers();
-  const existing = users.find(u => 
-    (u.email && u.email.toLowerCase() === emailOrPhone.toLowerCase()) || 
-    (u.phone && u.phone === emailOrPhone)
-  );
-
-  if (existing) {
-    return res.status(400).json({ success: false, error: 'An account with this email or phone number already exists.' });
-  }
-
-  const newUser = {
-    id: 'user-' + Date.now(),
-    name: name.trim(),
-    email: emailOrPhone.includes('@') ? emailOrPhone.trim().toLowerCase() : '',
-    phone: !emailOrPhone.includes('@') ? emailOrPhone.trim() : '',
-    password,
-    diagnosis: diagnosis.trim(),
-    emergencyContact: emergencyContact.trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  users.push(newUser);
-  saveUsers(users);
-
-  const safeUser = { ...newUser };
-  delete safeUser.password;
-
-  res.json({
-    success: true,
-    message: 'Account created successfully!',
-    user: safeUser
-  });
-});
-
-// 2. Auth Login
-app.post('/api/auth/login', (req, res) => {
-  const { emailOrPhone, password } = req.body;
-  if (!emailOrPhone || !password) {
-    return res.status(400).json({ success: false, error: 'Please enter your email/phone and password.' });
-  }
-
-  const users = getUsers();
-  const user = users.find(u => 
-    (u.email && u.email.toLowerCase() === emailOrPhone.toLowerCase().trim()) || 
-    (u.phone && u.phone.trim() === emailOrPhone.trim())
-  );
-
-  if (!user || user.password !== password) {
-    return res.status(401).json({ success: false, error: 'Invalid email/phone or password. Please try again.' });
-  }
-
-  const safeUser = { ...user };
-  delete safeUser.password;
-
-  res.json({
-    success: true,
-    message: `Welcome back, ${user.name}!`,
-    user: safeUser
-  });
-});
 
 // 1b. Handwritten Prescription Recognition (Automate identification & recognition of handwritten text from image)
 app.post('/api/handwritten-ocr', upload.single('prescriptionImage'), async (req, res) => {
@@ -561,9 +478,18 @@ Return only JSON without markdown fences.`;
 // Serve static client assets
 const distPath = path.join(__dirname, '../client/dist');
 if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
+  app.use(express.static(distPath, {
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }

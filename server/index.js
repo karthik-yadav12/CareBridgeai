@@ -41,10 +41,12 @@ const upload = multer({
 // Helper: Call Gemini REST API directly with fallback models
 async function callGemini(prompt, systemInstruction = '', inlineData = null) {
   const models = [
-    'gemini-2.5-flash',
-    'gemini-1.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-pro'
+    'gemini-3.5-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-3-flash-preview',
+    'gemini-3.7-flash',
+    'gemini-3.8-flash'
   ];
 
   if (GEMINI_API_KEY && GEMINI_API_KEY.trim() && GEMINI_API_KEY !== 'your_gemini_api_key_here') {
@@ -88,7 +90,13 @@ async function callGemini(prompt, systemInstruction = '', inlineData = null) {
           const data = await response.json();
           const candidate = data.candidates?.[0];
           const text = candidate?.content?.parts?.map(p => p.text).join('') || '';
-          if (text) return text;
+          if (text) {
+            console.log(`[Gemini API] Successfully generated content using model: ${model}`);
+            return text;
+          }
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          console.warn(`[Gemini API] Model ${model} returned HTTP ${response.status}:`, errData?.error?.message || response.statusText);
         }
       } catch (err) {
         console.warn(`Failed on model ${model}:`, err.message);

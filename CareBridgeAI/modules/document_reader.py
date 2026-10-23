@@ -160,7 +160,7 @@ def extract_handwriting_with_gemini_vision(image_bytes: bytes, api_key: str = No
         enhanced_bytes = preprocess_handwritten_image(image_bytes)
         b64_image = base64.b64encode(enhanced_bytes).decode("utf-8")
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key.strip()}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={key.strip()}"
         
         prompt = """You are a senior clinical pharmacist and medical transcription specialist.
 Decipher this handwritten doctor's prescription or clinical note image with utmost care.
